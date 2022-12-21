@@ -92,7 +92,7 @@ class _TourCardState extends State<TourCard> {
                                               AsyncSnapshot<QuerySnapshot>
                                               snapshot) {
                                             if (!snapshot.hasData) {
-                                              Center(child: Text('Loading'));
+                                             return Center(child: Text('Loading'));
                                             }
                                             return Container(
                                               height: 200,
@@ -104,7 +104,7 @@ class _TourCardState extends State<TourCard> {
                                                     return Padding(
                                                       padding:
                                                       const EdgeInsets.only(
-                                                          top: 10, left: 20),
+                                                          top: 10, left: 15),
                                                       child: Column(
                                                         crossAxisAlignment:
                                                         CrossAxisAlignment

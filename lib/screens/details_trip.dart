@@ -1,14 +1,21 @@
+import 'dart:io';
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pdf/pdf.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:travel_app/screens/tour_ui.dart';
 import 'package:travel_app/widgets/text_icon_trip.dart';
-
 import '../api/firebase_api.dart';
 import '../theme/color.dart';
 import '../utils/firebase_file.dart';
 import '../widgets/app_bar_all_withouthomepage.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:http/http.dart' as http;
 
 class DetailsTrip extends StatefulWidget {
   DetailsTrip({required this.pathfire, required this.idfiredetails});
@@ -24,6 +31,7 @@ class DetailsTrip extends StatefulWidget {
 class _DetailsTripState extends State<DetailsTrip> {
   late Future<List<FirebaseFile>> futureFiles =
       FirebaseApi.listAll('${widget.pathfire}');
+  late Future<PdfDocument> _document;
 
   List listdoc = [];
 
@@ -42,6 +50,105 @@ class _DetailsTripState extends State<DetailsTrip> {
     getData();
     futureFiles = FirebaseApi.listAll('${widget.pathfire}');
   }
+
+  var number = 0;
+
+  void increamnt() {
+    setState(() {
+      number++;
+    });
+  }
+
+  void downloadPDF() async {
+    var storageRef = FirebaseStorage.instance.ref().child('pdf/1.pdf');
+    dynamic data = await storageRef.getData();
+
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+      //add more permission to request here.
+    ].request();
+    if (statuses[Permission.storage]!.isGranted) {
+      showtoast('File Downloaded');
+
+      increamnt();
+
+      List<int> bytes = data;
+      File file = File('/storage/emulated/0/Download/dastan$number.pdf');
+      await file.writeAsBytes(bytes);
+     // showsnackbar(context);
+    } else {
+      showtoast('Download Filed');
+    }
+  }
+
+  void showtoast(String title) => Fluttertoast.showToast(
+        msg: title,
+        fontSize: 15,
+        backgroundColor: Colors.blue,
+        textColor: Colors.white,
+      );
+
+  // void showsnackbar(BuildContext context) {
+  //   final snackbar = SnackBar(content: Text('File Downloaded'),
+  //  backgroundColor: Colors.black45,
+  //   padding: EdgeInsets.all(10),
+  //   shape: Border.symmetric(),
+  //
+  //     action: SnackBarAction(
+  //       textColor: Colors.white,
+  //       label: "Open File",
+  //       onPressed: (){
+  //
+  //         File('/storage/emulated/0/Download/dastan$number.pdf');
+  //       },
+  //     ),
+  //   );
+  //   ScaffoldMessenger.of(context)..showSnackBar(snackbar);
+  // }
+
+
+
+
+
+  // String fileurl =
+  //     "https://firebasestorage.googleapis.com/v0/b/travel-app-9dc09.appspot.com/o/pdf%2F1.pdf?alt=media&token=ff5ffc10-485e-40a7-988d-a6540db412e9";
+
+  // Future downloadfilepdf() async {
+  //   Map<Permission, PermissionStatus> statuses = await [
+  //     Permission.storage,
+  //     //add more permission to request here.
+  //   ].request();
+  //
+  //   if (statuses[Permission.storage]!.isGranted) {
+  //     // String documentsPath = '/storage/emulated/0/Download/';
+  //     if (Platform.isIOS) {
+  //       Directory path = await getApplicationDocumentsDirectory();
+  //       // documentsPath = path.path;
+  //     }
+  //     var dir = await getExternalStorageDirectory();
+  //     if (dir != null) {
+  //       String documentsPath = '/storage/emulated/0/Download/';
+  //       String savename = "dastan.pdf";
+  //       documentsPath = dir.path + "/$savename";
+  //       print(documentsPath);
+  //       //output:  /storage/emulated/0/Download/banner.png
+  //       try {
+  //         await Dio().download(fileurl, documentsPath,
+  //             onReceiveProgress: (received, total) {
+  //           if (total != -1) {
+  //             print((received / total * 100).toStringAsFixed(0) + "%");
+  //             //you can build progressbar feature too
+  //           }
+  //         });
+  //         print("File is saved to download folder.");
+  //       } on DioError catch (e) {
+  //         print(e.message);
+  //       }
+  //     }
+  //   } else {
+  //     print("No permission to read and write.");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -223,11 +330,19 @@ class _DetailsTripState extends State<DetailsTrip> {
                                               padding: const EdgeInsets.only(
                                                   right: 10),
                                               child: ElevatedButton(
-                                                  onPressed: () {},
-                                                  child: Row(children: [
-                                                    Text('PDF'),
-                                                    Icon(Icons.download)
-                                                  ])),
+                                                onPressed: () {
+                                                  downloadPDF();
+                                                  // showtoast('File Downloaded ✔');
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Text('PDF  '),
+                                                    Icon(
+                                                      Icons.download,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
                                             ),
                                           ]),
                                     ]),

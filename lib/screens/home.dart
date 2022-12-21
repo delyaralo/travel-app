@@ -535,12 +535,13 @@ class _HomePageState extends State<HomePage> {
                     ),
                   );
                 }else if(index == 3) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Visa_Ui(),
-                    ),
-                  );
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Visa_Ui(),
+                      ),
+                    );
                 }else if(index == 4) {
                   Navigator.push(
                     context,
